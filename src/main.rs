@@ -19,9 +19,18 @@ fn main() {
     let mut min_cost = INFINITY;
 
     for attrs in generate_combinations() {
+        let (cost, path) = astar_h(&map, &attrs);
+        if cost < min_cost {
+            min_cost = cost;
+            // println!("{}", cost);
+            println!("{}{}{}{}", attrs[0], attrs[1], attrs[2], path);
+        }
+    }
+    for attrs in generate_combinations() {
         let (cost, path) = astar(&map, &attrs);
         if cost < min_cost {
             min_cost = cost;
+            // println!("{}", cost);
             println!("{}{}{}{}", attrs[0], attrs[1], attrs[2], path);
         }
     }
@@ -40,6 +49,44 @@ fn generate_combinations() -> Vec<[i32; 3]> {
         }
     }
     combinations
+}
+
+fn astar_h(map: &Map, attrs: &[i32; 3]) -> (f32, String) {
+    let mut open_list: BinaryHeap<Cell> = BinaryHeap::new();
+    let mut came_from: HashMap<Position, Position> = HashMap::new();
+    let mut g_cost: HashMap<Position, f32> = HashMap::new();
+
+    open_list.push(map.start);
+    g_cost.insert(map.start.pos, 0.);
+
+    while !open_list.is_empty() {
+        let current: Cell = open_list.pop().unwrap();
+        if current.pos == map.goal.pos {
+            let mut path = vec![];
+
+            let mut current_pos = current.pos;
+            while let Some(prev) = came_from.get(&current_pos) {
+                path.push(current_pos.came_from_direction(*prev));
+                current_pos = *prev;
+            }
+            return (g_cost[&map.goal.pos], path.iter().rev().collect::<String>());
+        }
+        // came_from.insert(current.pos, current.tile_cost);
+        for neighbour in map.get_neighbours(current.pos).iter() {
+            let cost = g_cost[&current.pos] as f32 + movement_cost(&map, current, neighbour, attrs);
+
+            if !g_cost.contains_key(&neighbour.pos) || cost < g_cost[&neighbour.pos] {
+                let mut neighbour = neighbour.clone();
+                g_cost.insert(neighbour.pos, cost);
+                came_from.insert(neighbour.pos, current.pos);
+                let f_cost = calc_h_cost(neighbour.pos, map.goal.pos, map.grid.len() as i32) + cost;
+                neighbour.f_cost = f_cost;
+                neighbour.g_cost = cost;
+                open_list.push(neighbour);
+            }
+        }
+    }
+    (INFINITY, "".to_string())
 }
 
 fn astar(map: &Map, attrs: &[i32; 3]) -> (f32, String) {
@@ -70,8 +117,7 @@ fn astar(map: &Map, attrs: &[i32; 3]) -> (f32, String) {
                 let mut neighbour = neighbour.clone();
                 g_cost.insert(neighbour.pos, cost);
                 came_from.insert(neighbour.pos, current.pos);
-                let f_cost = calc_h_cost(neighbour.pos, map.goal.pos, map.grid.len() as i32) + cost;
-                neighbour.f_cost = f_cost;
+                neighbour.f_cost = cost;
                 neighbour.g_cost = cost;
                 open_list.push(neighbour);
             }
