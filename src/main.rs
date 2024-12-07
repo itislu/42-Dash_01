@@ -94,8 +94,8 @@ fn calc_g_cost(tile_cost: i32, terrain: Terrain, attrs: &[i32; 3]) -> f32 {
         Terrain::Earth => attrs[2],
         _ => 0,
     } as usize;
-    let factors = [4.0, 3.0, 2.5, 2.0, 1.5, 1.0];
-    let factor = factors.get(idx).unwrap_or(&1.0);
+    const FACTORS: [f32; 6] = [4.0, 3.0, 2.5, 2.0, 1.5, 1.0];
+    let factor = FACTORS.get(idx).unwrap_or(&1.0);
 
     tile_cost as f32 * factor
 }
@@ -120,6 +120,7 @@ pub mod map {
     }
 
     #[derive(PartialEq, Clone, Copy, PartialOrd, Eq, Hash)]
+    #[repr(C)]
     pub struct Position {
         row: i32,
         col: i32,
@@ -261,6 +262,7 @@ pub mod map {
             }
         }
 
+        #[inline(always)]
         pub fn get_neighbours(&self, current_pos: Position) -> Vec<Cell> {
             let mut neighbours = Vec::new();
 
