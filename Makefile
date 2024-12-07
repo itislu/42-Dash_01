@@ -1,5 +1,8 @@
+NAME := marvin
+
 all:
 	cargo build
-	mv target/debug/marvin .
+	rm -f $(NAME)
+	cp -rf target/debug/$(NAME) .
 
 .PHONY: all
