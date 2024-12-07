@@ -47,7 +47,7 @@ fn astar(map: &Map, attrs: &[i32; 3]) -> (f32, String) {
     let mut came_from: HashMap<Position, Position> = HashMap::new();
     let mut g_cost: HashMap<Position, f32> = HashMap::new();
 
-    open_list.push(map.start.clone());
+    open_list.push(map.start);
     g_cost.insert(map.start.pos, 0.);
 
     while !open_list.is_empty() {
@@ -55,7 +55,7 @@ fn astar(map: &Map, attrs: &[i32; 3]) -> (f32, String) {
         if current.pos == map.goal.pos {
             let mut path = vec![];
 
-            let mut current_pos = current.pos.clone();
+            let mut current_pos = current.pos;
             while let Some(prev) = came_from.get(&current_pos) {
                 path.push(current_pos.came_from_direction(*prev));
                 current_pos = *prev;
@@ -243,7 +243,7 @@ pub mod map {
             for (row, line) in input.lines().enumerate() {
                 for (col, chars) in line.as_bytes().chunks(2).enumerate() {
                     let cell = Cell::new(chars, row, col);
-                    grid.push(cell.clone());
+                    grid.push(cell);
                     if cell.terrain == Terrain::Start {
                         start = cell;
                     } else if cell.terrain == Terrain::Goal {
