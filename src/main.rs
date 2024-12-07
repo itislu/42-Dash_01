@@ -80,11 +80,13 @@ fn astar(map: &Map, attrs: &[i32; 3]) -> (f32, String) {
     (INFINITY, "".to_string())
 }
 
+#[inline(always)]
 fn movement_cost(map: &Map, current: Cell, neighbour: &Cell, attrs: &[i32; 3]) -> f32 {
     // consider calc_h_cost(current_pos, goal_pos)
     calc_g_cost(neighbour.tile_cost, neighbour.terrain, attrs)
 }
 
+#[inline(always)]
 fn calc_g_cost(tile_cost: i32, terrain: Terrain, attrs: &[i32; 3]) -> f32 {
     let idx = match terrain {
         Terrain::Water => attrs[0],
@@ -98,6 +100,7 @@ fn calc_g_cost(tile_cost: i32, terrain: Terrain, attrs: &[i32; 3]) -> f32 {
     tile_cost as f32 * factor
 }
 
+#[inline(always)]
 fn calc_h_cost(current_pos: Position, goal_pos: Position, max_step: i32) -> f32 {
     let dist = current_pos.distance(goal_pos) as f32;
     let p = 1. / max_step as f32;
