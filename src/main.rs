@@ -5,7 +5,15 @@ use std::{
 };
 
 fn main() {
-    let input = input::read_file("mario.txt");
+    let args: Vec<String> = std::env::args().collect();
+    let filename = match args.get(1) {
+        Some(name) => name,
+        None => {
+            eprintln!("Usage: {} <filename>", args[0]);
+            std::process::exit(1);
+        }
+    };
+    let input = input::read_file(filename);
     let map = Map::new(&input);
 
     let mut min_cost = INFINITY;
@@ -14,7 +22,7 @@ fn main() {
         let (cost, path) = astar(&map, &attrs);
         if cost < min_cost {
             min_cost = cost;
-            println!("cost: {}\nsolution:\n{}{}{}{}", cost, attrs[0], attrs[1], attrs[2], path);
+            println!("{}{}{}{}", attrs[0], attrs[1], attrs[2], path);
         }
     }
 }
@@ -56,16 +64,14 @@ fn astar(map: &Map, attrs: &[i32; 3]) -> (f32, String) {
         }
         // came_from.insert(current.pos, current.tile_cost);
         for neighbour in map.get_neighbours(current.pos).iter() {
-            let cur_cost = g_cost[&current.pos] as f32;
-            let move_cost = movement_cost(&map, current, neighbour, attrs);
-
             let cost = g_cost[&current.pos] as f32 + movement_cost(&map, current, neighbour, attrs);
 
             if !g_cost.contains_key(&neighbour.pos) || cost < g_cost[&neighbour.pos] {
                 let mut neighbour = neighbour.clone();
-                neighbour.reach_cost = cost;
                 g_cost.insert(neighbour.pos, cost);
                 came_from.insert(neighbour.pos, current.pos);
+                let f_cost = calc_h_cost(neighbour.pos, map.goal.pos) + cost;
+                neighbour.reach_cost = f_cost;
                 open_list.push(neighbour);
             }
         }
@@ -91,13 +97,11 @@ fn calc_g_cost(tile_cost: i32, terrain: Terrain, attrs: &[i32; 3]) -> f32 {
     tile_cost as f32 * factor
 }
 
-fn calc_h_cost(current_pos: Position, goal_pos: Position) -> i32 {
-    current_pos.distance(goal_pos)
+fn calc_h_cost(current_pos: Position, goal_pos: Position) -> f32 {
+    current_pos.distance(goal_pos) as f32
 }
 
 pub mod map {
-    use std::f32::INFINITY;
-
     #[derive(PartialEq, Clone, Copy, PartialOrd, Eq)]
     pub enum Terrain {
         Water,
