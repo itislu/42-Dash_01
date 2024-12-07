@@ -214,12 +214,14 @@ pub mod map {
             let self_f_cost = self.f_cost as i32;
             let other_f_cost = other.f_cost as i32;
             
-            match self_f_cost.cmp(&other_f_cost) {
+            // match self_f_cost.cmp(&other_f_cost) {
+            match other_f_cost.cmp(&self_f_cost) {
                 Ordering::Equal => {
                     // Only convert g_costs if f_costs are equal
                     let self_g_cost = self.g_cost as i32;
             let other_g_cost = other.g_cost as i32;
-                    self_g_cost.cmp(&other_g_cost)
+                    // self_g_cost.cmp(&other_g_cost)
+                    other_g_cost.cmp(&self_g_cost)
                 }
                 ordering => ordering
             }
