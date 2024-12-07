@@ -71,7 +71,8 @@ fn astar(map: &Map, attrs: &[i32; 3]) -> (f32, String) {
                 g_cost.insert(neighbour.pos, cost);
                 came_from.insert(neighbour.pos, current.pos);
                 let f_cost = calc_h_cost(neighbour.pos, map.goal.pos, map.grid.len() as i32) + cost;
-                neighbour.reach_cost = f_cost;
+                neighbour.f_cost = f_cost;
+                neighbour.g_cost = cost;
                 open_list.push(neighbour);
             }
         }
@@ -104,6 +105,8 @@ fn calc_h_cost(current_pos: Position, goal_pos: Position, max_step: i32) -> f32 
 }
 
 pub mod map {
+    use std::cmp::Ordering;
+
     #[derive(PartialEq, Clone, Copy, PartialOrd, Eq)]
     pub enum Terrain {
         Water,
@@ -149,13 +152,27 @@ pub mod map {
     pub struct Cell {
         pub terrain: Terrain,
         pub tile_cost: i32,
-        pub reach_cost: f32,
+        // pub reach_cost: f32,
+        pub g_cost: f32,
+        pub f_cost: f32,
         pub pos: Position,
     }
 
     impl Ord for Cell {
+        #[inline(always)]
         fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-            self.tile_cost.cmp(&other.tile_cost)
+            let self_f_cost = self.f_cost as i32;
+            let other_f_cost = other.f_cost as i32;
+            
+            match self_f_cost.cmp(&other_f_cost) {
+                Ordering::Equal => {
+                    // Only convert g_costs if f_costs are equal
+                    let self_g_cost = self.g_cost as i32;
+            let other_g_cost = other.g_cost as i32;
+                    self_g_cost.cmp(&other_g_cost)
+                }
+                ordering => ordering
+            }
         }
     }
 
@@ -197,7 +214,9 @@ pub mod map {
             Cell {
                 terrain,
                 tile_cost,
-                reach_cost: 0.,
+                // reach_cost: 0.,
+                g_cost: 0.,
+                f_cost: 0.,
                 pos: Position::new(row as i32, col as i32),
             }
         }
