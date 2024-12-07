@@ -7,8 +7,6 @@ use std::{
 fn main() {
     let input = input::read_file("mario.txt");
     let map = Map::new(&input);
-    println!("input:\n{}\n", input);
-    println!("map:\n{}\n", map);
 
     let mut min_cost = INFINITY;
 
