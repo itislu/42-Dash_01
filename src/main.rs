@@ -70,7 +70,7 @@ fn astar(map: &Map, attrs: &[i32; 3]) -> (f32, String) {
                 let mut neighbour = neighbour.clone();
                 g_cost.insert(neighbour.pos, cost);
                 came_from.insert(neighbour.pos, current.pos);
-                let f_cost = calc_h_cost(neighbour.pos, map.goal.pos) + cost;
+                let f_cost = calc_h_cost(neighbour.pos, map.goal.pos, map.grid.len() as i32) + cost;
                 neighbour.reach_cost = f_cost;
                 open_list.push(neighbour);
             }
@@ -97,8 +97,10 @@ fn calc_g_cost(tile_cost: i32, terrain: Terrain, attrs: &[i32; 3]) -> f32 {
     tile_cost as f32 * factor
 }
 
-fn calc_h_cost(current_pos: Position, goal_pos: Position) -> f32 {
-    current_pos.distance(goal_pos) as f32
+fn calc_h_cost(current_pos: Position, goal_pos: Position, max_step: i32) -> f32 {
+    let dist = current_pos.distance(goal_pos) as f32;
+    let p = 1. / max_step as f32;
+    dist * (1.0 + p)
 }
 
 pub mod map {
